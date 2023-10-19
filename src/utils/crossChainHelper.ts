@@ -6,8 +6,8 @@ import Safe from "@gnosis.pm/safe-core-sdk";
 import { LZ_APP_ABI } from "../constants/abi";
 import { MainnetEndpointId, TestnetEndpointId, SandboxEndpointId } from "@layerzerolabs/lz-definitions";
 import { promptToProceed, arrayToCsv, getConfig } from "./helpers";
-const path = require("path");
-const fs = require("fs");
+import path from "path";
+import fs from "fs";
 import { writeFile } from "fs/promises";
 
 
