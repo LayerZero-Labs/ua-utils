@@ -1,4 +1,9 @@
-import { getDeploymentAddresses, getApplicationConfig, getEndpointAddress } from "./utils/crossChainHelper";
+import {
+	getDeploymentAddresses,
+	getApplicationConfig,
+	getEndpointAddress,
+	getContractAt,
+} from './utils/crossChainHelper'
 import { ENDPOINT_ABI, MESSAGING_LIBRARY_ABI } from  "./constants/abi";
 import { logError } from "./utils/helpers";
 
@@ -21,17 +26,17 @@ export default async (taskArgs: any, hre: any) => {
 		}
 	}	
 
-	const endpoint = await hre.ethers.getContractAt(ENDPOINT_ABI, getEndpointAddress(network));
+	const endpoint = await getContractAt(hre, network, ENDPOINT_ABI, getEndpointAddress(network));
 	const appConfig = await endpoint.uaConfigLookup(contractAddress);
 	const sendVersion = appConfig.sendVersion;
 	const receiveVersion = appConfig.receiveVersion;	
 	const sendLibraryAddress = sendVersion === 0 ? await endpoint.defaultSendLibrary() : appConfig.sendLibrary;
-	const sendLibrary = await hre.ethers.getContractAt(MESSAGING_LIBRARY_ABI, sendLibraryAddress);	
+	const sendLibrary = await getContractAt(hre, network, MESSAGING_LIBRARY_ABI, sendLibraryAddress);
 	let receiveLibrary: any;
 
 	if (sendVersion !== receiveVersion){
 		const receiveLibraryAddress = receiveVersion === 0 ? await endpoint.defaultReceiveLibraryAddress() : appConfig.receiveLibraryAddress;
-		receiveLibrary = await hre.ethers.getContractAt(MESSAGING_LIBRARY_ABI, receiveLibraryAddress);
+		receiveLibrary = await getContractAt(hre, network, MESSAGING_LIBRARY_ABI, receiveLibraryAddress);
 	}
 		
 	const remoteConfig: any[] = await Promise.all(

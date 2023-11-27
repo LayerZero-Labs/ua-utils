@@ -35,6 +35,7 @@ export const LZ_ENDPOINTS: {[key: string]: string} = {
     "harmony-mainnet": "0x9740FF91F1985D8d2B71494aE1A2f723bb3Ed9E4",
     "harmony-testnet": "0xae92d5aD7583AD66E49A0c67BAd18F6ba52dDDc1",
     "hubble-testnet": "0x8b14D287B4150Ff22Ac73DF8BE720e933f659abc",
+    "idex-testnet": "0x55370E0fBB5f5b8dAeD978BA1c075a499eB107B8",
     "kava-mainnet": "0xb6319cC6c8c27A8F5dAF0dD3DF91EA35C4720dd7",
     "kava-testnet": "0x8b14D287B4150Ff22Ac73DF8BE720e933f659abc",
     "klaytn-mainnet": "0x9740FF91F1985D8d2B71494aE1A2f723bb3Ed9E4",
