@@ -255,19 +255,23 @@ export const executeGnosisTransactions = async (hre: any, network: string, gnosi
 		signerOrProvider: signer,
 	});
 
-	const safeSdk: Safe = await Safe.create({ ethAdapter, safeAddress, ...(!!contractNetworks && contractNetworks)});
+	const safeSdk: Safe = await Safe.create({ ethAdapter, safeAddress, ...(!!contractNetworks && { contractNetworks })});
 	const gnosisTransactions = transactions.map((tx) => ({ to: tx.contractAddress, data: tx.calldata!, value: "0" }));
-	const nonce = await safeService.getNextNonce(safeAddress);
-	const safeTransaction = await safeSdk.createTransaction(gnosisTransactions, { nonce });
+	if (gnosisTransactions.length > 0) {
+		const nonce = await safeService.getNextNonce(safeAddress);
+		const safeTransaction = await safeSdk.createTransaction(gnosisTransactions, { nonce });
 
-	await safeSdk.signTransaction(safeTransaction);
-	const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
-	await safeService.proposeTransaction({
-		safeAddress,
-		safeTransaction,
-		safeTxHash,
-		senderAddress: signer.address,
-	});
+		await safeSdk.signTransaction(safeTransaction);
+		const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
+		await safeService.proposeTransaction({
+			safeAddress,
+			safeTransaction,
+			safeTxHash,
+			senderAddress: signer.address,
+		});
+	} else {
+		console.log(`No transactions to submit for ${network}`);
+	}
 }
 
 export const getDeploymentAddresses = (network: string, throwIfMissing: boolean = true): any => {

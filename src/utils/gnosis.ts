@@ -15,7 +15,7 @@ type SafeConfig = {
  * Contract addresses for each network.
  */
 type ContractNetworks = {
-    [chainListId: number]: {
+    [chainListId: string]: {
         multiSendAddress: string
         safeMasterCopyAddress: string
         safeProxyFactoryAddress: string
