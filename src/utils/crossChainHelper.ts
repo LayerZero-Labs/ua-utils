@@ -6,7 +6,8 @@ import Safe from "@gnosis.pm/safe-core-sdk";
 import { LZ_APP_ABI } from "../constants/abi";
 import { LZ_ENDPOINTS } from "../constants/endpoints";
 import { MainnetEndpointId, TestnetEndpointId, SandboxEndpointId } from "@layerzerolabs/lz-definitions";
-import { promptToProceed, arrayToCsv, getConfig } from "./helpers";
+import { toContractNetworksString, getSafeConfigs, SafeConfigs } from './gnosis'
+import { promptToProceed, arrayToCsv } from "./helpers";
 const path = require("path");
 const fs = require("fs");
 import { writeFile } from "fs/promises";
@@ -174,7 +175,7 @@ export async function executeTransactions(hre: any, taskArgs: any, transactionBy
 
 	if (taskArgs.n) {
 		await promptToProceed("Would you like to Submit to gnosis?", taskArgs.noPrompt);
-        const gnosisConfig = getConfig(taskArgs.gnosisConfigPath);
+        const gnosisConfig = getSafeConfigs(taskArgs.gnosisConfigPath);
 		await Promise.all(
 			transactionBynetwork.map(async ({ network, transactions }) => {
 				const transactionToCommit = transactions.filter((transaction: any) => transaction.needChange);
@@ -239,14 +240,14 @@ export async function executeTransactions(hre: any, taskArgs: any, transactionBy
 }
 
 
-export const executeGnosisTransactions = async (hre: any, network: string, gnosisConfig: any, transactions: Transaction[]) => {
+export const executeGnosisTransactions = async (hre: any, network: string, gnosisConfig: SafeConfigs, transactions: Transaction[]) => {
 	const signer = await getConnectedWallet(hre, network, 0);
 	if (!gnosisConfig[network]) {
 		throw Error(`Gnosis for ${network} not found or not supported`);
 	}
 
-	const { safeAddress, url } = gnosisConfig[network];
-	console.log(`safeAddress[${safeAddress}] url[${url}]`);
+	const { safeAddress, url, contractNetworks } = gnosisConfig[network];
+	console.log(`safeAddress[${safeAddress}] url[${url}] ${contractNetworks && toContractNetworksString(contractNetworks)}`);
 
 	const safeService = new SafeServiceClient(url);
 	const ethAdapter = new EthersAdapter({
@@ -254,7 +255,7 @@ export const executeGnosisTransactions = async (hre: any, network: string, gnosi
 		signerOrProvider: signer,
 	});
 
-	const safeSdk: Safe = await Safe.create({ ethAdapter, safeAddress });
+	const safeSdk: Safe = await Safe.create({ ethAdapter, safeAddress, ...(!!contractNetworks && contractNetworks)});
 	const gnosisTransactions = transactions.map((tx) => ({ to: tx.contractAddress, data: tx.calldata!, value: "0" }));
 	const nonce = await safeService.getNextNonce(safeAddress);
 	const safeTransaction = await safeSdk.createTransaction(gnosisTransactions, { nonce });
