@@ -118,6 +118,15 @@ interface DefaultConfigMesh {
 }
 
 /**
+ * Input contracts configuration.
+ */
+type ContractConfigs = {
+    [network: string]: {
+        address: string,
+    }
+}
+
+/**
  * Gets the remote config for a chain path.
  * @param {string} remoteNetwork the remote network name
  * @param {ethers.Contract} sendLibrary the local send library contract
@@ -242,21 +251,22 @@ const getVersions = async(
 /**
  * Gets the default config for the mesh of networks.
  * @param {HardhatRuntimeEnvironment} hre the hardhat runtime environment
- * @param {string[]} networks the list of networks
+ * @param {ContractConfigs} configs the contract configs
  * @param {string} name the name of the deployed UserApplication
  * @param {string} checkConnectionFunctionFragment the checkConnection function fragment
  */
 const generateAppConfig = async (
     hre: HardhatRuntimeEnvironment,
-    networks: string[],
+    configs: ContractConfigs,
     name: string,
     checkConnectionFunctionFragment: string
 ): Promise<DefaultConfigMesh> => {
+    const networks = Object.keys(configs)
     return (networks.reduce(async (acc, network: string) => {
         const provider = getProvider(hre, network)
         const endpointAddress = getEndpointAddress(network)
         const endpoint = new ethers.Contract(endpointAddress, ENDPOINT_ABI, provider)
-        const address = getDeploymentAddress(network, name)
+        const address = configs[network].address
         const { sendVersion, sendLibrary, receiveVersion, receiveLibrary } = await getVersions(endpoint, address, provider)
         const remoteConfigs = await getRemoteConfigs(hre, network, address, networks, sendLibrary, receiveLibrary, checkConnectionFunctionFragment)
         return {
@@ -265,6 +275,7 @@ const generateAppConfig = async (
                 name,
                 sendVersion,
                 receiveVersion,
+                address,
                 remoteConfigs,
             }
         }
@@ -275,12 +286,17 @@ const generateAppConfig = async (
 //----------------------------------- HardHat Task Related -----------------------------------//
 //--------------------------------------------------------------------------------------------//
 
-/**
- * Get networks array from provided csv argument.
- * @param {string} networks
- */
-const getNetworksFromArgs = (networks: string): string[] =>
-    networks.split(",")
+const getContractConfigs = (inputNetworks: string, name: string): ContractConfigs => {
+    return inputNetworks.split(",").reduce((acc, inputNetwork) => {
+        const [key,value] = inputNetwork.split(":")
+        return {
+            ...acc,
+            [key]: {
+                address: value ? value : getDeploymentAddress(key, name),
+            }
+        }
+    }, {})
+}
 
 /**
  * Sanity check the output file name format.
@@ -307,9 +323,9 @@ export const generateAppConfigAction: ActionType<TaskArguments> = async (
     taskArgs: GenerateDefaultConfigTaskArgs,
     hre: HardhatRuntimeEnvironment
 ): Promise<void> => {
-    const { networks: csvNetworks, name, outputFileName, checkConnectionFunctionFragment } = taskArgs
-    const networks = getNetworksFromArgs(csvNetworks)
+    const { networks: inputNetworks, name, outputFileName, checkConnectionFunctionFragment } = taskArgs
+    const configs = getContractConfigs(inputNetworks, name)
     checkOutputFileName(outputFileName)
-    const defaultConfigMesh = await generateAppConfig(hre, networks, name, checkConnectionFunctionFragment)
+    const defaultConfigMesh = await generateAppConfig(hre, configs, name, checkConnectionFunctionFragment)
     await writeFile(outputFileName, JSON.stringify(defaultConfigMesh, null, 2))
 }
