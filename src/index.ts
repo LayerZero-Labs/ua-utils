@@ -19,7 +19,7 @@ task("getDefaultConfig", "outputs the default Send and Receive Messaging Library
 
 task("generateAppConfig", "generates the config mesh for a User Application", generateAppConfigAction)
 	.addParam("networks", "comma separated list of networks")
-	.addParam('name', 'name of the deployed contract. Should be specified only if the deployment information is located in the deployments folder')
+	.addParam("name", "name of the deployed contract. Should be specified only if the deployment information is located in the deployments folder")
 	.addOptionalParam("outputFileName", "the path to the output file", "./constants/defaultConfig.json", types.string)
 	.addOptionalParam("checkConnectionFunctionFragment", "the checkConnection function fragment", LZ_APP_TRUSTED_REMOTE_LOOKUP_FUNCTION_FRAGMENT, types.string)
 
