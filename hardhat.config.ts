@@ -1,5 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config";
-
+import "@nomiclabs/hardhat-ethers"
+import "hardhat-deploy"
+import "hardhat-deploy-ethers"
 import "./src/index"
 
 // This adds support for typescript paths mappings

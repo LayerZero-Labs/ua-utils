@@ -1,6 +1,6 @@
 {
   "name": "@layerzerolabs/ua-utils",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "repository": "https://github.com/LayerZero-Labs/ua-utils.git",
   "license": "MIT",
   "main": "dist/index.js",
@@ -21,9 +21,10 @@
     "@gnosis.pm/safe-service-client": "1.1.1",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "dotenv": "^16.0.3",
-    "ethers": "^5.5.2",
+    "ethers": "^5.7.2",
     "hardhat": "2.12.5",
     "hardhat-deploy": "^0.11.22",
+    "hardhat-deploy-ethers": "^0.3.0-beta.12",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^7.2.0",
@@ -42,8 +43,9 @@
     "@gnosis.pm/safe-ethers-lib": "^1.0.0",
     "@gnosis.pm/safe-service-client": "1.1.1",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
-    "ethers": "^5.5.2",
+    "ethers": "^5.7.2",
     "hardhat": "2.12.5",
-    "hardhat-deploy": "^0.11.22"
+    "hardhat-deploy": "^0.11.22",
+    "hardhat-deploy-ethers": "^0.3.0-beta.12"
   }
 }
