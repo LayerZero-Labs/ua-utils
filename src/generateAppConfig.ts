@@ -28,7 +28,7 @@ interface GenerateDefaultConfigTaskArgs {
     /**
      * The name of the deployed UserApplication.
      */
-    name: string
+    name?: string
 
     /**
      * The path to the output file.
@@ -92,7 +92,12 @@ interface ChainPathConfig {
     /**
      * Local network name.
      */
-    name: string,
+    name?: string,
+
+    /**
+     * The local network contract address.
+     */
+    address?: string,
 
     /**
      * The default send library version for the local network.
@@ -252,14 +257,14 @@ const getVersions = async(
  * Gets the default config for the mesh of networks.
  * @param {HardhatRuntimeEnvironment} hre the hardhat runtime environment
  * @param {ContractConfigs} configs the contract configs
- * @param {string} name the name of the deployed UserApplication
  * @param {string} checkConnectionFunctionFragment the checkConnection function fragment
+ * @param {string} name the name of the deployed UserApplication
  */
 const generateAppConfig = async (
     hre: HardhatRuntimeEnvironment,
     configs: ContractConfigs,
-    name: string,
-    checkConnectionFunctionFragment: string
+    checkConnectionFunctionFragment: string,
+    name?: string,
 ): Promise<DefaultConfigMesh> => {
     const networks = Object.keys(configs)
     return (networks.reduce(async (acc, network: string) => {
@@ -272,7 +277,7 @@ const generateAppConfig = async (
         return {
             ...await acc,
             [network]: {
-                name,
+                ...(name && { name }),
                 sendVersion,
                 receiveVersion,
                 address,
@@ -286,13 +291,13 @@ const generateAppConfig = async (
 //----------------------------------- HardHat Task Related -----------------------------------//
 //--------------------------------------------------------------------------------------------//
 
-const getContractConfigs = (inputNetworks: string, name: string): ContractConfigs => {
+const getContractConfigs = (inputNetworks: string, name?: string): ContractConfigs => {
     return inputNetworks.split(",").reduce((acc, inputNetwork) => {
         const [key,value] = inputNetwork.split(":")
         return {
             ...acc,
             [key]: {
-                address: value ? value : getDeploymentAddress(key, name),
+                address: value ? value : getDeploymentAddress(key, name!),
             }
         }
     }, {})
@@ -326,6 +331,6 @@ export const generateAppConfigAction: ActionType<TaskArguments> = async (
     const { networks: inputNetworks, name, outputFileName, checkConnectionFunctionFragment } = taskArgs
     const configs = getContractConfigs(inputNetworks, name)
     checkOutputFileName(outputFileName)
-    const defaultConfigMesh = await generateAppConfig(hre, configs, name, checkConnectionFunctionFragment)
+    const defaultConfigMesh = await generateAppConfig(hre, configs, checkConnectionFunctionFragment, name)
     await writeFile(outputFileName, JSON.stringify(defaultConfigMesh, null, 2))
 }
