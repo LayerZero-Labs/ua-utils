@@ -4,8 +4,8 @@ import EthersAdapter from "@gnosis.pm/safe-ethers-lib";
 import SafeServiceClient from "@gnosis.pm/safe-service-client";
 import Safe from "@gnosis.pm/safe-core-sdk";
 import { LZ_APP_ABI } from "../constants/abi";
-import { LZ_ENDPOINTS } from "../constants/endpoints";
 import { MainnetEndpointId, TestnetEndpointId, SandboxEndpointId } from "@layerzerolabs/lz-definitions";
+import {ChainKey, LZ_ADDRESS} from "@layerzerolabs/lz-sdk";
 import { toContractNetworksString, getSafeConfigs, SafeConfigs } from './gnosis'
 import { promptToProceed, arrayToCsv } from "./helpers";
 const path = require("path");
@@ -328,7 +328,14 @@ export const getApplicationConfig = async (remoteNetwork: string, sendLibrary: a
 	};
 };
 
-export const getEndpointAddress = (network: string): string => { return LZ_ENDPOINTS[network] }
+export const getEndpointAddress = (network: string): string => {
+	network = network.replace('-mainnet', '')
+	const address = LZ_ADDRESS[network as ChainKey];
+	if (!address) {
+		throw new Error(`Endpoint address not found for network: ${network}`);
+	}
+	return address;
+};
 
 // expecting "chain-environment" eg. "ethereum-mainnet", "ethereum-testnet", "ethereum-sandbox"
 export const getLayerZeroChainId = (network: string): string => {
