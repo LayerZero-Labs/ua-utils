@@ -339,17 +339,22 @@ export const getEndpointAddress = (network: string): string => {
 
 // expecting "chain-environment" eg. "ethereum-mainnet", "ethereum-testnet", "ethereum-sandbox"
 export const getLayerZeroChainId = (network: string): string => {
-    const [chainName, environment] = network.split("-");
-    const chainIdEnum = getChainIdEnum(chainName, environment)
-    if(environment == "mainnet") {
-        return MainnetEndpointId[chainIdEnum as any]
-    } else if(environment == "testnet") {
-        return TestnetEndpointId[chainIdEnum as any]
-    }  else if(environment == "sandbox") {
-        return SandboxEndpointId[chainIdEnum as any]
-    } else {
-        throw new Error("cannot find chainId");
-    }
+	const tmp = network.split("-");
+	if (tmp.length <= 1) {
+		throw new Error("cannot parse chain '" + network + "'. should be in the format '<chain-name>_<mainnet|testnet>' ")
+	}
+	const [chainName, environment] = tmp;
+
+	const chainIdEnum = getChainIdEnum(chainName, environment)
+	if (environment == "mainnet") {
+		return MainnetEndpointId[chainIdEnum as any]
+	} else if (environment == "testnet") {
+		return TestnetEndpointId[chainIdEnum as any]
+	} else if (environment == "sandbox") {
+		return SandboxEndpointId[chainIdEnum as any]
+	} else {
+		throw new Error("cannot find chainId for chain '" + chainName + "' and environment '" + environment + "'");
+	}
 }
 
 const getChainIdEnum = (chainName: string, environment: string,): string => {
